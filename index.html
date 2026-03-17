@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Žodyno pratybos (5-8 pamokos)</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4a6fa5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LT Žodynas">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #e8edf4 0%, #f4f1ee 100%);
+            min-height: 100vh;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .review-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .toggle-pill {
+            transition: all 0.25s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // ==================== UNIT METADATA ====================
+        const unitInfo = {
+            unit5: { title: "Darbas ir laisvalaikis", subtitle: "5 pamoka", color: "emerald" },
+            unit6: { title: "Bilietas į...", subtitle: "6 pamoka", color: "sky" },
+            unit7: { title: "Namai, mieli namai", subtitle: "7 pamoka", color: "amber" },
+            unit8: { title: "Daktare!!!", subtitle: "8 pamoka", color: "rose" }
+        };
+
+        // ==================== VOCABULARY DATA ====================
+        const vocabularyData = {
+            unit5: [
+                { lithuanian: "administracija", english: "administration" },
+                { lithuanian: "akordeonas", english: "accordion" },
+                { lithuanian: "aktyvus, -i", english: "active" },
+                { lithuanian: "anas, -a", english: "that one, the other one" },
+                { lithuanian: "atlyginimas", english: "payment, salary" },
+                { lithuanian: "atlyginti, atlygina, atlygino", english: "to pay back" },
+                { lithuanian: "atmosfera", english: "atmosphere" },
+                { lithuanian: "aukštasis išsilavinimas", english: "higher education" },
+                { lithuanian: "balandis", english: "April" },
+                { lithuanian: "bendradarbis, -ė", english: "co-worker" },
+                { lithuanian: "bendravimas", english: "communication" },
+                { lithuanian: "birželis", english: "June" },
+                { lithuanian: "biuras", english: "office" },
+                { lithuanian: "dalykas", english: "subject" },
+                { lithuanian: "darbas", english: "work" },
+                { lithuanian: "deja", english: "unfortunately" },
+                { lithuanian: "dėkoti, dėkoja, dėkojo", english: "to thank" },
+                { lithuanian: "dokumentas", english: "document" },
+                { lithuanian: "eiti į svečius", english: "to visit someone" },
+                { lithuanian: "eiti pasivaikščioti", english: "to go for a walk" },
+                { lithuanian: "fakultetas", english: "faculty" },
+                { lithuanian: "filharmonija", english: "philharmonic society" },
+                { lithuanian: "filmas", english: "film" },
+                { lithuanian: "futbolas", english: "football (soccer)" },
+                { lithuanian: "gegužė", english: "May" },
+                { lithuanian: "gitara", english: "guitar" },
+                { lithuanian: "groti", english: "to play (a musical instrument)" },
+                { lithuanian: "gruodis", english: "December" },
+                { lithuanian: "įgūdis", english: "skill" },
+                { lithuanian: "įmonė", english: "company/firm" },
+                { lithuanian: "informacija", english: "information" },
+                { lithuanian: "intensyvus, -i", english: "intensive" },
+                { lithuanian: "internetas", english: "internet" },
+                { lithuanian: "išsilavinimas", english: "education" },
+                { lithuanian: "jūra", english: "sea" },
+                { lithuanian: "kaimas", english: "village/countryside" },
+                { lithuanian: "kėdė", english: "chair" },
+                { lithuanian: "keliauti, keliauja, keliavo", english: "to travel" },
+                { lithuanian: "klausimas", english: "question" },
+                { lithuanian: "klausyti, klauso, klausė", english: "to listen to" },
+                { lithuanian: "klijai", english: "glue" },
+                { lithuanian: "knyga", english: "book" },
+                { lithuanian: "kompiuteris", english: "computer" },
+                { lithuanian: "komunikuoti, komunikuoja, komunikavo", english: "to communicate" },
+                { lithuanian: "koncertuoti, koncertuoja, koncertavo", english: "to give a concert" },
+                { lithuanian: "kopijavimo aparatas", english: "copying machine" },
+                { lithuanian: "kopijuoti, kopijuoja, kopijavo", english: "to make a copy" },
+                { lithuanian: "korespondencija", english: "correspondence" },
+                { lithuanian: "kovas", english: "March" },
+                { lithuanian: "krepšinis", english: "basketball" },
+                { lithuanian: "laikraštis", english: "newspaper" },
+                { lithuanian: "laisvalaikis", english: "free time" },
+                { lithuanian: "lapkritis", english: "November" },
+                { lithuanian: "laukti, laukia, laukė", english: "to wait" },
+                { lithuanian: "lempa", english: "lamp" },
+                { lithuanian: "liepa", english: "July" },
+                { lithuanian: "mažas, -a", english: "small/little" },
+                { lithuanian: "metai", english: "year" },
+                { lithuanian: "miegoti, miega, miegojo", english: "to sleep" },
+                { lithuanian: "minutė", english: "minute" },
+                { lithuanian: "miškas", english: "forest" },
+                { lithuanian: "mokėti, moka, mokėjo", english: "to know" },
+                { lithuanian: "mokinys, -ė", english: "pupil" },
+                { lithuanian: "mokslo metai", english: "school year" },
+                { lithuanian: "mūšis", english: "battle" },
+                { lithuanian: "organizacinis", english: "organisational" },
+                { lithuanian: "pailsėti", english: "to have a rest" },
+                { lithuanian: "(pa)sakyti, (pa)sako, (pa)sakė", english: "to tell" },
+                { lithuanian: "pasiduoti, pasiduoda, pasidavė", english: "to give up" },
+                { lithuanian: "patirtis", english: "experience" },
+                { lithuanian: "per + acc.", english: "on, through" },
+                { lithuanian: "pianinas", english: "piano" },
+                { lithuanian: "pieštukas", english: "pencil" },
+                { lithuanian: "pinigai", english: "money" },
+                { lithuanian: "pobūdis", english: "nature" },
+                { lithuanian: "pomėgis", english: "hobby" },
+                { lithuanian: "popierius", english: "paper" },
+                { lithuanian: "praeitas, -a", english: "last" },
+                { lithuanian: "priedas", english: "bonus" },
+                { lithuanian: "prieš + acc.", english: "ago/before" },
+                { lithuanian: "ramus, -i", english: "quiet" },
+                { lithuanian: "rašyti, rašo, rašė", english: "to write" },
+                { lithuanian: "registracija", english: "registration" },
+                { lithuanian: "reikalavimas", english: "requirement" },
+                { lithuanian: "reikalingas, -a", english: "necessary" },
+                { lithuanian: "reikėti, reikia, reikėjo", english: "to need" },
+                { lithuanian: "rengimas", english: "preparation" },
+                { lithuanian: "rugpjūtis", english: "August" },
+                { lithuanian: "rugsėjis", english: "September" },
+                { lithuanian: "rungtynės", english: "match" },
+                { lithuanian: "saksofonas", english: "saxophone" },
+                { lithuanian: "sąlyga", english: "condition" },
+                { lithuanian: "sausis", english: "January" },
+                { lithuanian: "sąvaržėlė", english: "paperclip" },
+                { lithuanian: "segtuvas", english: "binder" },
+                { lithuanian: "serialas", english: "series" },
+                { lithuanian: "skaičiuotuvas", english: "calculator" },
+                { lithuanian: "skaityti, skaito, skaitė", english: "to read" },
+                { lithuanian: "skenuoti, skenuoja, skenavo", english: "to scan" },
+                { lithuanian: "smagu", english: "fun" },
+                { lithuanian: "spalis", english: "October" },
+                { lithuanian: "spausdinti, spausdina, spausdino", english: "to print" },
+                { lithuanian: "spausdintuvas", english: "printer" },
+                { lithuanian: "stalas", english: "table" },
+                { lithuanian: "straipsnis", english: "article" },
+                { lithuanian: "susitikimas", english: "meeting" },
+                { lithuanian: "sutartis", english: "agreement" },
+                { lithuanian: "svečias", english: "guest" },
+                { lithuanian: "šeiminė padėtis", english: "marital status" },
+                { lithuanian: "šventė", english: "celebration" },
+                { lithuanian: "tarptautinis, -ė", english: "international" },
+                { lithuanian: "tenisas", english: "tennis" },
+                { lithuanian: "testas", english: "test" },
+                { lithuanian: "tinklinis", english: "volleyball" },
+                { lithuanian: "trintukas", english: "rubber" },
+                { lithuanian: "tūkstantis", english: "thousand" },
+                { lithuanian: "tušinukas", english: "pen" },
+                { lithuanian: "tvarkymas", english: "management" },
+                { lithuanian: "vairuotojo pažymėjimas", english: "driver's licence" },
+                { lithuanian: "vakar", english: "yesterday" },
+                { lithuanian: "vakarėlis", english: "party" },
+                { lithuanian: "valanda", english: "hour" },
+                { lithuanian: "vardadienis / vardo diena", english: "name day" },
+                { lithuanian: "vasaris", english: "February" },
+                { lithuanian: "vidurinė mokykla", english: "secondary school" },
+                { lithuanian: "visas, -a", english: "all" },
+                { lithuanian: "viskas", english: "all/everything" },
+                { lithuanian: "žaisti", english: "to play (a sport)" },
+                { lithuanian: "žinoti, žino, žinojo", english: "to know" },
+                { lithuanian: "žirklės", english: "scissors" },
+                { lithuanian: "žurnalas", english: "magazine/journal" }
+            ],
+            unit6: [
+                { lithuanian: "aikštelė", english: "platform (for buses)" },
+                { lithuanian: "anksti", english: "early" },
+                { lithuanian: "apeiti, apeina, apėjo", english: "to walk around" },
+                { lithuanian: "aplankyti, aplanko, aplankė", english: "to visit" },
+                { lithuanian: "apsirengti, apsirengia, apsirengė", english: "to dress up" },
+                { lithuanian: "ateiti, ateina, atėjo", english: "to come" },
+                { lithuanian: "atidėtas, -a", english: "delayed" },
+                { lithuanian: "atrodyti, atrodo, atrodė", english: "to look" },
+                { lithuanian: "atvykimas", english: "arrival" },
+                { lithuanian: "atvykti, atvyksta, atvyko", english: "to arrive" },
+                { lithuanian: "autobusas", english: "bus" },
+                { lithuanian: "automobilis", english: "car" },
+                { lithuanian: "bagažas", english: "luggage" },
+                { lithuanian: "baigtis, baigiasi, baigėsi", english: "to finish" },
+                { lithuanian: "bilietas", english: "ticket" },
+                { lithuanian: "būtinai", english: "necessarily" },
+                { lithuanian: "didingas, -a", english: "majestic" },
+                { lithuanian: "dviratis", english: "bike" },
+                { lithuanian: "fabrikas", english: "factory" },
+                { lithuanian: "geležinkelio stotis", english: "train station" },
+                { lithuanian: "greitas, -a", english: "fast" },
+                { lithuanian: "grįžti, grįžta, grįžo", english: "to return / to come back" },
+                { lithuanian: "įeiti", english: "to enter" },
+                { lithuanian: "įėjimas", english: "entrance" },
+                { lithuanian: "įlaipinimas", english: "boarding" },
+                { lithuanian: "ilgas, -a", english: "long" },
+                { lithuanian: "įspūdingas, -a", english: "impressive" },
+                { lithuanian: "išeiti", english: "to leave" },
+                { lithuanian: "išėjimas", english: "exit" },
+                { lithuanian: "išsinuomoti, išsinuomoja, išsinuomojo", english: "to rent" },
+                { lithuanian: "išvykimas", english: "departure" },
+                { lithuanian: "išvykti, išvyksta, išvyko", english: "to depart" },
+                { lithuanian: "įžymybė", english: "famous place" },
+                { lithuanian: "jaukus, -i", english: "cosy" },
+                { lithuanian: "kasa", english: "ticket office" },
+                { lithuanian: "kelias", english: "track (for trains)" },
+                { lithuanian: "keliauti, keliauja, keliavo", english: "to travel" },
+                { lithuanian: "kelionė", english: "trip/journey" },
+                { lithuanian: "keltas", english: "ferry" },
+                { lithuanian: "kitą kartą", english: "next time" },
+                { lithuanian: "kitas, -a", english: "next" },
+                { lithuanian: "komanda", english: "team" },
+                { lithuanian: "kontrolierius", english: "ticket collector" },
+                { lithuanian: "laimėti, laimi, laimėjo", english: "to win" },
+                { lithuanian: "laivas", english: "ship" },
+                { lithuanian: "laukti, laukia, laukė", english: "to wait" },
+                { lithuanian: "lėktuvas", english: "plane" },
+                { lithuanian: "lipti, lipa, lipo", english: "to climb / to go up" },
+                { lithuanian: "lyti, lyja, lijo", english: "to rain" },
+                { lithuanian: "liūtis", english: "heavy rain" },
+                { lithuanian: "motociklas", english: "motorbike" },
+                { lithuanian: "nesu tikras, -a", english: "I'm not sure" },
+                { lithuanian: "netekti amo", english: "to be very surprised" },
+                { lithuanian: "nueiti", english: "to go to (reach a certain place)" },
+                { lithuanian: "nuobodus, -i", english: "boring" },
+                { lithuanian: "nuolaida", english: "discount" },
+                { lithuanian: "nuostabus, -i", english: "wonderful, amazing" },
+                { lithuanian: "oro uostas", english: "airport" },
+                { lithuanian: "pareiti", english: "to come back (about home or living place)" },
+                { lithuanian: "pastatyti, pastato, pastatė", english: "to build" },
+                { lithuanian: "pastebėti, pastebi, pastebėjo", english: "to notice" },
+                { lithuanian: "pasų kontrolė", english: "passport control" },
+                { lithuanian: "patarimas", english: "advice" },
+                { lithuanian: "pereiti", english: "to cross (e.g. a street)" },
+                { lithuanian: "pernai", english: "last year" },
+                { lithuanian: "persėdimas", english: "connecting flight" },
+                { lithuanian: "peršlapti, peršlampa, peršlapo", english: "to get wet" },
+                { lithuanian: "pėsčiomis", english: "on foot" },
+                { lithuanian: "planuoti, planuoja, planavo", english: "to plan" },
+                { lithuanian: "plaukti, plaukia, plaukė", english: "to sail / to swim" },
+                { lithuanian: "pradžia", english: "beginning" },
+                { lithuanian: "praeiti pro šalį", english: "to pass by" },
+                { lithuanian: "praleisti, praleidžia, praleido", english: "to spend" },
+                { lithuanian: "pramoga", english: "entertainment" },
+                { lithuanian: "prasidėti, prasideda, prasidėjo", english: "to start" },
+                { lithuanian: "rekomenduoti, rekomenduoja, rekomendavo", english: "to recommend" },
+                { lithuanian: "rytoj", english: "tomorrow" },
+                { lithuanian: "romantiškas, -a", english: "romantic" },
+                { lithuanian: "saugumo patikra", english: "security check" },
+                { lithuanian: "sektis, sekasi, sekėsi", english: "to do well" },
+                { lithuanian: "seminaras", english: "seminar" },
+                { lithuanian: "servisas", english: "service" },
+                { lithuanian: "skėtis", english: "umbrella" },
+                { lithuanian: "skysčiai", english: "liquids" },
+                { lithuanian: "skrydis", english: "flight" },
+                { lithuanian: "skristi, skrenda, skrido", english: "to fly" },
+                { lithuanian: "smagus, -i", english: "fun" },
+                { lithuanian: "spektaklis", english: "performance" },
+                { lithuanian: "sportuoti, sportuoja, sportavo", english: "to play a sport" },
+                { lithuanian: "stropus, -i", english: "diligent" },
+                { lithuanian: "sunkus, -i", english: "heavy/difficult" },
+                { lithuanian: "šįmet", english: "this year" },
+                { lithuanian: "taikyti, taiko, taikė nuolaidą", english: "to apply a discount" },
+                { lithuanian: "taksi", english: "taxi" },
+                { lithuanian: "tikrai", english: "really" },
+                { lithuanian: "traukinys", english: "train" },
+                { lithuanian: "troleibusas", english: "trolleybus" },
+                { lithuanian: "trukmė", english: "duration" },
+                { lithuanian: "trukti, trunka, truko", english: "to last" },
+                { lithuanian: "trumpas, -a", english: "short" },
+                { lithuanian: "turbūt", english: "maybe" },
+                { lithuanian: "užeiti", english: "to visit for a short time, to come by" },
+                { lithuanian: "užvakar", english: "the day before yesterday" },
+                { lithuanian: "vagonas", english: "carriage" },
+                { lithuanian: "vartai", english: "gate" },
+                { lithuanian: "važinėti, važinėja, važinėjo", english: "to ride around (e.g. by bike)" },
+                { lithuanian: "vėluoti, vėluoja, vėlavo", english: "to be late" },
+                { lithuanian: "vieta", english: "seat" },
+                { lithuanian: "virti, verda, virė", english: "to cook" },
+                { lithuanian: "vis tiek", english: "still" },
+                { lithuanian: "žmogus, pl. žmonės", english: "person, pl. people" }
+            ],
+            unit7: [
+                { lithuanian: "antklodė", english: "blanket" },
+                { lithuanian: "apavas", english: "footwear" },
+                { lithuanian: "apyrankė", english: "bracelet" },
+                { lithuanian: "apsirengti, apsirengia, apsirengė", english: "to put on" },
+                { lithuanian: "atskiras, -a", english: "separate" },
+                { lithuanian: "auksas", english: "gold" },
+                { lithuanian: "aukštakulniai batai", english: "high heels" },
+                { lithuanian: "auskaras", english: "earring" },
+                { lithuanian: "avėti, avi, avėjo", english: "to wear (shoes)" },
+                { lithuanian: "baldai", english: "furniture" },
+                { lithuanian: "balkonas", english: "balcony" },
+                { lithuanian: "basutė", english: "sandal" },
+                { lithuanian: "batas", english: "shoe" },
+                { lithuanian: "bendras, -a", english: "common; joint; shared" },
+                { lithuanian: "be to", english: "in addition to" },
+                { lithuanian: "beveik", english: "almost" },
+                { lithuanian: "buitinė technika", english: "household appliances" },
+                { lithuanian: "dėvėti, dėvi, dėvėjo", english: "to wear (clothes)" },
+                { lithuanian: "dėžė", english: "box" },
+                { lithuanian: "dydis", english: "size" },
+                { lithuanian: "dovana", english: "present/gift" },
+                { lithuanian: "dovanoti, dovanoja, dovanojo", english: "to make a present" },
+                { lithuanian: "drabužis", english: "piece of clothing" },
+                { lithuanian: "drabužių spinta", english: "wardrobe" },
+                { lithuanian: "dryžuotas, -a", english: "striped" },
+                { lithuanian: "dubenėlis", english: "bowl" },
+                { lithuanian: "durys", english: "door" },
+                { lithuanian: "dušas", english: "shower" },
+                { lithuanian: "džinsai", english: "jeans" },
+                { lithuanian: "džiugu", english: "it's great" },
+                { lithuanian: "elegantiškas, -a", english: "elegant" },
+                { lithuanian: "erdvus, -i", english: "spacious" },
+                { lithuanian: "fotelis", english: "armchair" },
+                { lithuanian: "gėlėtas, -a", english: "flowery" },
+                { lithuanian: "grandinėlė", english: "chain" },
+                { lithuanian: "grindys", english: "floor" },
+                { lithuanian: "gulėti, guli, gulėjo", english: "to lie" },
+                { lithuanian: "ieškoti, ieško, ieškojo", english: "to look for" },
+                { lithuanian: "įkurtuvės", english: "house-warming party" },
+                { lithuanian: "ilgas, -a", english: "long" },
+                { lithuanian: "(iš)leisti, (iš)leidžia, (iš)leido", english: "to spend" },
+                { lithuanian: "įsivaizduoti, įsivaizduoja, įsivaizdavo", english: "to imagine" },
+                { lithuanian: "išnuomojamas", english: "for rent" },
+                { lithuanian: "kaboti, kabo, kabojo", english: "to hang" },
+                { lithuanian: "kailiniai", english: "fur coat" },
+                { lithuanian: "kaina", english: "price" },
+                { lithuanian: "kėdė", english: "chair" },
+                { lithuanian: "kelnės", english: "trousers" },
+                { lithuanian: "kepurė", english: "hat (warm)" },
+                { lithuanian: "kietas, -a", english: "hard, firm" },
+                { lithuanian: "kilimas", english: "carpet" },
+                { lithuanian: "klasikinis, -ė", english: "classic" },
+                { lithuanian: "klozetas", english: "toilet, water closet" },
+                { lithuanian: "knygų spinta", english: "book shelf" },
+                { lithuanian: "kojinė", english: "sock" },
+                { lithuanian: "kostiumas", english: "suit" },
+                { lithuanian: "kostiumėlis", english: "suit (for women)" },
+                { lithuanian: "kriauklė", english: "sink" },
+                { lithuanian: "laikyti, laiko, laikė", english: "to keep" },
+                { lithuanian: "langas", english: "window" },
+                { lithuanian: "languotas, -a", english: "checked (fabric)" },
+                { lithuanian: "lėkštė", english: "plate" },
+                { lithuanian: "linas", english: "flax" },
+                { lithuanian: "lininis, -ė", english: "linen" },
+                { lithuanian: "lova", english: "bed" },
+                { lithuanian: "lubos", english: "ceiling" },
+                { lithuanian: "marškinėliai", english: "T-shirt" },
+                { lithuanian: "marškiniai", english: "shirt" },
+                { lithuanian: "medinis, -ė", english: "wooden" },
+                { lithuanian: "medvilnė", english: "cotton" },
+                { lithuanian: "medvilninis, -ė", english: "from cotton" },
+                { lithuanian: "medžiaga", english: "material" },
+                { lithuanian: "megzti, mezga, mezgė", english: "to knit" },
+                { lithuanian: "megztinis", english: "sweater" },
+                { lithuanian: "miegamasis", english: "bedroom" },
+                { lithuanian: "minkštas, -a", english: "soft" },
+                { lithuanian: "modernus, -i", english: "modern" },
+                { lithuanian: "mokesčiai (komunaliniai)", english: "utility fee" },
+                { lithuanian: "mugė", english: "fair" },
+                { lithuanian: "mūvėti", english: "to wear (about gloves, trousers, a skirt)" },
+                { lithuanian: "negalėti, negali, negalėjo pakęsti", english: "can't stand" },
+                { lithuanian: "naminis gyvūnas", english: "pet" },
+                { lithuanian: "nešioti, nešioja, nešiojo", english: "to wear (clothes)" },
+                { lithuanian: "nuolaida", english: "discount" },
+                { lithuanian: "nuoma", english: "rent" },
+                { lithuanian: "nuomotis, nuomojasi, nuomojosi", english: "to rent" },
+                { lithuanian: "nuosavas, -a", english: "private" },
+                { lithuanian: "nutikti, nutinka, nutiko", english: "to happen" },
+                { lithuanian: "pagalvė", english: "pillow" },
+                { lithuanian: "paklodė", english: "sheet" },
+                { lithuanian: "palaidinė", english: "top" },
+                { lithuanian: "paltas", english: "coat" },
+                { lithuanian: "panašus, -i", english: "similar" },
+                { lithuanian: "papuošalas", english: "piece of jewellery" },
+                { lithuanian: "pasiimti, pasiima, pasiėmė", english: "to take" },
+                { lithuanian: "pasipuošti, pasipuošia, pasipuošė", english: "to adorn oneself, to dress up" },
+                { lithuanian: "patogumai", english: "conveniences" },
+                { lithuanian: "patogus, -i", english: "comfortable" },
+                { lithuanian: "pavargęs, -usi", english: "tired" },
+                { lithuanian: "paveikslas", english: "picture" },
+                { lithuanian: "peilis", english: "knife" },
+                { lithuanian: "persikelti, persikelia, persikėlė", english: "to move (to a new flat/house)" },
+                { lithuanian: "pinigai", english: "money" },
+                { lithuanian: "pirkti, perka, pirko", english: "to buy" },
+                { lithuanian: "pirštinė", english: "glove" },
+                { lithuanian: "platus, -i", english: "wide" },
+                { lithuanian: "prekiauti, prekiauja, prekiavo", english: "to trade / to sell" },
+                { lithuanian: "puodelis, puodukas", english: "cup/mug" },
+                { lithuanian: "rankinė", english: "bag" },
+                { lithuanian: "rankovė", english: "sleeve" },
+                { lithuanian: "rankšluostis", english: "towel" },
+                { lithuanian: "rasti, randa, rado", english: "to find" },
+                { lithuanian: "raštas", english: "pattern" },
+                { lithuanian: "raštuotas, -a", english: "patterned" },
+                { lithuanian: "remontas", english: "renovation" },
+                { lithuanian: "savininkas", english: "owner" },
+                { lithuanian: "segėti, segi, segėjo", english: "to wear (about earrings)" },
+                { lithuanian: "siena", english: "wall" },
+                { lithuanian: "sijonas", english: "skirt" },
+                { lithuanian: "skalbimo mašina", english: "washing machine" },
+                { lithuanian: "skelbimas", english: "advertisement" },
+                { lithuanian: "skirtingas, -a", english: "different" },
+                { lithuanian: "sofa", english: "sofa" },
+                { lithuanian: "spinta", english: "wardrobe" },
+                { lithuanian: "spintelė", english: "cupboard" },
+                { lithuanian: "stalas", english: "table" },
+                { lithuanian: "staliukas", english: "small table" },
+                { lithuanian: "stiklinė", english: "glass" },
+                { lithuanian: "striukė", english: "parka" },
+                { lithuanian: "sugesti, sugenda, sugedo", english: "to break down" },
+                { lithuanian: "suknelė", english: "dress" },
+                { lithuanian: "suplyšęs, -usi", english: "torn" },
+                { lithuanian: "svajonė", english: "dream" },
+                { lithuanian: "svetainė", english: "living room" },
+                { lithuanian: "šakutė", english: "fork" },
+                { lithuanian: "šaldytuvas", english: "fridge" },
+                { lithuanian: "šalikas", english: "scarf" },
+                { lithuanian: "šaukštas", english: "spoon" },
+                { lithuanian: "šaukštelis", english: "teaspoon" },
+                { lithuanian: "šilkas", english: "silk" },
+                { lithuanian: "šilkinis, -ė", english: "from silk" },
+                { lithuanian: "švarkas", english: "jacket" },
+                { lithuanian: "šviestuvas", english: "chandelier" },
+                { lithuanian: "taupyti, taupo, taupė", english: "to save" },
+                { lithuanian: "tikti, tinka, tiko", english: "to fit" },
+                { lithuanian: "traukti dėmesį", english: "to attract attention" },
+                { lithuanian: "tualetas", english: "toilet" },
+                { lithuanian: "užmiestis", english: "suburb" },
+                { lithuanian: "užuolaida", english: "curtain" },
+                { lithuanian: "vaizdas", english: "view" },
+                { lithuanian: "veidrodis", english: "mirror" },
+                { lithuanian: "vidutinis, -ė", english: "medium, average" },
+                { lithuanian: "vienspalvis, -ė", english: "one-colour" },
+                { lithuanian: "vilna", english: "wool" },
+                { lithuanian: "vilnonis, -ė", english: "from wool" },
+                { lithuanian: "viryklė", english: "cooker" },
+                { lithuanian: "virtuvė", english: "kitchen" },
+                { lithuanian: "vonia", english: "bathroom" },
+                { lithuanian: "žiedas", english: "ring" },
+                { lithuanian: "žieminis, -ė", english: "for winter" }
+            ],
+            unit8: [
+                { lithuanian: "aiškinti, aiškina, aiškino", english: "to explain" },
+                { lithuanian: "akis", english: "eye" },
+                { lithuanian: "alavijas", english: "aloe" },
+                { lithuanian: "aplink", english: "around" },
+                { lithuanian: "atsibosti, atsibosta, atsibodo", english: "to get bored" },
+                { lithuanian: "audinys", english: "material/fabric" },
+                { lithuanian: "aukšta temperatūra", english: "high temperature" },
+                { lithuanian: "ausis", english: "ear" },
+                { lithuanian: "bandyti, bando, bandė", english: "to try" },
+                { lithuanian: "bent", english: "at least" },
+                { lithuanian: "berti, beria, bėrė", english: "to add, to pour" },
+                { lithuanian: "čiaudėti, čiaudi, čiaudėjo", english: "to sneeze" },
+                { lithuanian: "dalis", english: "part" },
+                { lithuanian: "dangus", english: "sky" },
+                { lithuanian: "debesis", english: "cloud" },
+                { lithuanian: "debesuotas, -a", english: "cloudy" },
+                { lithuanian: "drėgnas, -a", english: "humid" },
+                { lithuanian: "džiaugtis, džiaugiasi, džiaugėsi", english: "to be glad" },
+                { lithuanian: "gabaliukas", english: "piece" },
+                { lithuanian: "gaivus, -i", english: "fresh" },
+                { lithuanian: "galva", english: "head" },
+                { lithuanian: "gamintis, gaminasi, gaminosi", english: "to produce (itself, naturally)" },
+                { lithuanian: "gamta", english: "nature" },
+                { lithuanian: "garai", english: "steam" },
+                { lithuanian: "gerklė", english: "throat" },
+                { lithuanian: "gydytis, gydosi, gydėsi", english: "to heal oneself" },
+                { lithuanian: "giedras, -a", english: "clear, cloudless" },
+                { lithuanian: "gilus, -i", english: "deep" },
+                { lithuanian: "girdėti, girdi, girdėjo", english: "to hear" },
+                { lithuanian: "grybauti, grybauja, grybavo", english: "to pick mushrooms" },
+                { lithuanian: "gripas", english: "flu" },
+                { lithuanian: "gulėti, guli, gulėjo", english: "to lie down" },
+                { lithuanian: "ilsėtis, ilsisi, ilsėjosi", english: "to rest" },
+                { lithuanian: "indas", english: "dish/container" },
+                { lithuanian: "įpilti, įpila, įpylė", english: "to pour" },
+                { lithuanian: "įsivaizduoti, įsivaizduoja, įsivaizdavo", english: "to imagine" },
+                { lithuanian: "išspausti, išspaudžia, išspaudė", english: "to squeeze" },
+                { lithuanian: "jaustis, jaučiasi, jautėsi", english: "to feel" },
+                { lithuanian: "juoktis, juokiasi, juokėsi", english: "to laugh" },
+                { lithuanian: "kaitinti, kaitina, kaitino", english: "to heat up" },
+                { lithuanian: "kaklas", english: "neck" },
+                { lithuanian: "karščiuoti, karščiuoja, karščiavo", english: "to have a fever" },
+                { lithuanian: "kaulas", english: "bone" },
+                { lithuanian: "keltis, keliasi, kėlėsi", english: "to get up" },
+                { lithuanian: "kepenys", english: "liver" },
+                { lithuanian: "kiekis", english: "quantity" },
+                { lithuanian: "kilti, kyla, kilo", english: "to rise" },
+                { lithuanian: "koja", english: "leg" },
+                { lithuanian: "komplikacija", english: "complication" },
+                { lithuanian: "kosėti, kosti, kosėjo", english: "to cough" },
+                { lithuanian: "kosulys", english: "cough" },
+                { lithuanian: "kraujas", english: "blood" },
+                { lithuanian: "kreiptis, kreipiasi, kreipėsi", english: "to address / to go to" },
+                { lithuanian: "kristi, krinta, krito", english: "to fall down" },
+                { lithuanian: "krūtinė", english: "chest" },
+                { lithuanian: "kūnas", english: "body" },
+                { lithuanian: "kvėpuoti, kvėpuoja, kvėpavo", english: "to breathe" },
+                { lithuanian: "laikyti, laiko, laikė", english: "to keep / to hold" },
+                { lithuanian: "laipsnis", english: "degree" },
+                { lithuanian: "lašas", english: "drop" },
+                { lithuanian: "lašinti, lašina, lašino", english: "to drip" },
+                { lithuanian: "laužyti, laužo, laužė", english: "to break" },
+                { lithuanian: "laužyti, laužo, laužė kaulus", english: "to feel very tired and hurt all over" },
+                { lithuanian: "leisti, leidžia, leido", english: "to spend" },
+                { lithuanian: "liemuo", english: "waist" },
+                { lithuanian: "lietingas, -a", english: "rainy" },
+                { lithuanian: "lietus", english: "rain" },
+                { lithuanian: "lygus, -i", english: "equal" },
+                { lithuanian: "lyti, lyja, lijo", english: "to rain" },
+                { lithuanian: "lupena", english: "peel" },
+                { lithuanian: "lūpos", english: "lips" },
+                { lithuanian: "maišyti, maišo, maišė", english: "to mix" },
+                { lithuanian: "maudytis, maudosi, maudėsi", english: "to bathe" },
+                { lithuanian: "mėnulis", english: "moon" },
+                { lithuanian: "mokyti, moko, mokė", english: "to teach" },
+                { lithuanian: "mokytis, mokosi, mokėsi", english: "to learn" },
+                { lithuanian: "naudoti, naudoja, naudojo", english: "to use" },
+                { lithuanian: "nekaip", english: "not well" },
+                { lithuanian: "nosis", english: "nose" },
+                { lithuanian: "nugara", english: "back" },
+                { lithuanian: "nutikti, nutinka, nutiko", english: "to happen" },
+                { lithuanian: "oda", english: "skin" },
+                { lithuanian: "organas", english: "organ" },
+                { lithuanian: "pakelis", english: "packet" },
+                { lithuanian: "pasilenkti, pasilenkia, pasilenkė", english: "to bend over" },
+                { lithuanian: "pasimatymas", english: "date" },
+                { lithuanian: "paskui", english: "later, afterwards" },
+                { lithuanian: "pasveikti, pasveiksta, pasveiko", english: "to get better" },
+                { lithuanian: "pavargęs, -usi", english: "tired" },
+                { lithuanian: "peršalimas", english: "cold (a disease)" },
+                { lithuanian: "pilti, pila, pylė", english: "to pour" },
+                { lithuanian: "pilvas", english: "belly" },
+                { lithuanian: "plaučiai", english: "lungs" },
+                { lithuanian: "plaukai", english: "hair" },
+                { lithuanian: "porcija", english: "portion" },
+                { lithuanian: "praustis, prausiasi, prausėsi", english: "to wash oneself" },
+                { lithuanian: "pravėsti, pravėsta, pravėso", english: "to get cooler" },
+                { lithuanian: "purškalas", english: "spray" },
+                { lithuanian: "purus, -i", english: "fluffy" },
+                { lithuanian: "pūsti, pučia, pūtė", english: "to blow" },
+                { lithuanian: "ranka", english: "hand, arm" },
+                { lithuanian: "rengtis, rengiasi, rengėsi", english: "to dress oneself" },
+                { lithuanian: "rūkas", english: "fog" },
+                { lithuanian: "saulėtas, -a", english: "sunny" },
+                { lithuanian: "sausas, -a", english: "dry" },
+                { lithuanian: "sirgti, serga, sirgo", english: "to be ill" },
+                { lithuanian: "skaudėti, skauda, skaudėjo", english: "to hurt" },
+                { lithuanian: "skysčiai", english: "liquids" },
+                { lithuanian: "skirtumas", english: "difference" },
+                { lithuanian: "skrandis", english: "stomach" },
+                { lithuanian: "slidu", english: "slippery" },
+                { lithuanian: "slinkti, slenka, slinko", english: "to pass / to move slowly" },
+                { lithuanian: "sloga", english: "runny nose" },
+                { lithuanian: "sloguoti, sloguoja, slogavo", english: "to have a runny nose" },
+                { lithuanian: "smegenys", english: "brain" },
+                { lithuanian: "sniegas", english: "snow" },
+                { lithuanian: "sniegingas, -a", english: "snowy" },
+                { lithuanian: "snigti, sninga, snigo", english: "to snow" },
+                { lithuanian: "soda", english: "soda" },
+                { lithuanian: "stebėtis, stebisi, stebėjosi", english: "to be surprised" },
+                { lithuanian: "sušlapti, sušlampa, sušlapo", english: "to get wet" },
+                { lithuanian: "sutrinti, sutrina, sutrynė", english: "to grind" },
+                { lithuanian: "sveikata", english: "health" },
+                { lithuanian: "šaltis", english: "cold (noun)" },
+                { lithuanian: "širdis", english: "heart" },
+                { lithuanian: "šnervė", english: "nostril" },
+                { lithuanian: "šukuoti(s), šukuoja(si), šukavo(si)", english: "to comb" },
+                { lithuanian: "šviesti, šviečia, švietė", english: "to shine" },
+                { lithuanian: "tabletė", english: "pill, tablet" },
+                { lithuanian: "tarkuoti, tarkuoja, tarkavo", english: "to grate" },
+                { lithuanian: "temperatūra", english: "temperature" },
+                { lithuanian: "tikėtis, tikisi, tikėjosi", english: "to expect" },
+                { lithuanian: "tirštas, -a", english: "dense" },
+                { lithuanian: "tvankus, -i", english: "airless" },
+                { lithuanian: "tvyroti, tvyro, tvyrojo", english: "to linger about" },
+                { lithuanian: "uždengti, uždengia, uždengė", english: "to cover" },
+                { lithuanian: "užkimęs, -usi", english: "hoarse" },
+                { lithuanian: "užvirti, užverda, užvirė", english: "to bring to a boil" },
+                { lithuanian: "vaistai", english: "medicine" },
+                { lithuanian: "vaistininkas, -ė", english: "pharmacist" },
+                { lithuanian: "veidas", english: "face" },
+                { lithuanian: "vėjas", english: "wind" },
+                { lithuanian: "vėjuota", english: "windy" },
+                { lithuanian: "vynioti, vynioja, vyniojo", english: "to wrap" },
+                { lithuanian: "visur", english: "everywhere" },
+                { lithuanian: "žvaigždė", english: "star" },
+                { lithuanian: "žvaigždėtas, -a", english: "starry" },
+                { lithuanian: "žvejoti, žvejoja, žvejojo", english: "to go fishing" }
+            ]
+        };
+
+        // ==================== SENTENCE DATA ====================
+        const sentenceData = {
+            unit5: [
+                { sentence: "Mano draugas groja _____. Jis labai mėgsta muziką.", correct: "gitara", options: ["gitara", "šaškėmis", "futbolu", "tenisu"] },
+                { sentence: "Ką mėgsti veikti _____?", correct: "laisvalaikiu", options: ["laisvalaikiu", "susitikimu", "knyga", "filmu"] },
+                { sentence: "Liepa yra vasarą, o _____ yra žiemą.", correct: "sausis", options: ["sausis", "gegužė", "rugpjūtis", "birželis"] },
+                { sentence: "Ji dirba didelėje _____. Ten dirba 500 žmonių.", correct: "įmonėje", options: ["įmonėje", "kėdėje", "miške", "internete"] },
+                { sentence: "Šis spausdintuvas blogai _____.", correct: "spausdina", options: ["spausdina", "rašo", "rengia", "tvarko"] },
+                { sentence: "Mano _____ yra skaityti knygas ir žaisti krepšinį.", correct: "pomėgiai", options: ["pomėgiai", "pinigai", "dokumentai", "klijai"] },
+                { sentence: "Vakar mes ėjome _____ į mišką. Oras buvo labai gražus.", correct: "pasivaikščioti", options: ["pasivaikščioti", "žiūrėti", "kopijuoti", "groti"] },
+                { sentence: "Koks tavo _____? – Aš esu mokytojas.", correct: "darbas", options: ["darbas", "filmas", "serialas", "testas"] },
+                { sentence: "Prašau, _____ dokumentą ir atsiųskite man kopiją.", correct: "nuskenuokite", options: ["nuskenuokite", "miegokite", "grokite", "žaiskite"] },
+                { sentence: "Šį _____ aš pradėjau naują darbą. Esu labai laiminga!", correct: "mėnesį", options: ["mėnesį", "savaitę", "metais", "užvakar"] },
+                { sentence: "Ar tu _____ groti pianinu? – Taip, groju jau 5 metus.", correct: "moki", options: ["moki", "žaidi", "skaitai", "rašai"] },
+                { sentence: "Lietuvių kalbos _____ buvo labai sunkus.", correct: "testas", options: ["testas", "knyga", "kinas", "popierius"] },
+                { sentence: "Mano biure ant stalo stovi _____, kompiuteris ir telefonas.", correct: "lempa", options: ["lempa", "jūra", "miškas", "serialas"] },
+                { sentence: "Ji labai _____. Ji sportuoja, dirba ir studijuoja kiekvieną dieną.", correct: "aktyvi", options: ["aktyvi", "rami", "maža", "intensyvi"] },
+                { sentence: "Aš vakar buvau _____. Žiūrėjau labai gerą filmą.", correct: "kine", options: ["kine", "biure", "kaime", "miške"] },
+                { sentence: "Aš skaitau _____ apie sportą.", correct: "laikraštį", options: ["laikraštį", "skaičiuotuvą", "segtuvą", "popierių"] }
+            ],
+            unit6: [
+                { sentence: "Mes keliaujame į Paryžių. Mūsų _____ išvyksta 10 valandą.", correct: "traukinys", options: ["traukinys", "bagažas", "bilietas", "vartai"] },
+                { sentence: "Atsiprašau, kur yra _____? Noriu nusipirkti autobuso bilietą.", correct: "kasa", options: ["kasa", "vieta", "pradžia", "aikštelė"] },
+                { sentence: "Lėktuvas _____ – jis atvyks tik 15 valandą.", correct: "atidėtas", options: ["atidėtas", "greitas", "trumpas", "smagus"] },
+                { sentence: "Atsiprašau, iš kokio _____ išvyksta traukinys į Kauną? – Iš pirmo.", correct: "kelio", options: ["įėjimo", "išėjimo", "kelio", "vartų"] },
+                { sentence: "Kelionė iš viso _____ 3 valandas. Atvyksime tik vakare.", correct: "trunka", options: ["trunka", "baigiasi", "prasideda", "vėluoja"] },
+                { sentence: "Oras labai blogas – _____ visą dieną.", correct: "lyja", options: ["lyja", "skrenda", "plaukia", "vėluoja"] },
+                { sentence: "Vasarą mes _____ prie jūros. Ten buvo labai gražu.", correct: "atostogavome", options: ["atostogavome", "vėlavome", "laimėjome", "virėme"] },
+                { sentence: "Aš noriu _____ automobilį atostogoms.", correct: "išsinuomoti", options: ["išsinuomoti", "pastebėti", "pereiti", "pastatyti"] },
+                { sentence: "Oro uoste reikia praeiti _____.", correct: "saugumo patikrą", options: ["saugumo patikrą", "nuolaidą", "komandą", "pradžią"] },
+                { sentence: "Mes _____ į Londoną lėktuvu. Skrydis buvo labai trumpas.", correct: "skridome", options: ["skridome", "plaukėme", "ėjome", "lipome"] },
+                { sentence: "_____ aš važiuosiu į Vilnių traukiniu.", correct: "Rytoj", options: ["Rytoj", "Vakar", "Pernai", "Užvakar"] },
+                { sentence: "Laivas _____ per jūrą labai lėtai.", correct: "plaukia", options: ["plaukia", "skrenda", "bėga", "lipa"] },
+                { sentence: "Atsiprašau, iš kurios _____ išvyksta autobusas į Kauną?", correct: "aikštelės", options: ["aikštelės", "kelionės", "nuolaidos", "trukmės"] },
+                { sentence: "Šis filmas buvo _____! Labai rekomenduoju.", correct: "nuostabus", options: ["nuostabus", "nuobodus", "sunkus", "trumpas"] },
+                { sentence: "Pėsčiomis eiti per toli. Geriau važiuokime _____.", correct: "autobusu", options: ["autobusu", "bilietu", "lėktuvu", "laivu"] }
+            ],
+            unit7: [
+                { sentence: "Mūsų _____ yra nedidelis: jame yra svetainė, miegamasis, virtuvė ir vonia.", correct: "butas", options: ["butas", "kambarys", "baldai", "miegamasis"] },
+                { sentence: "Ant lango kabo gražios žalios _____.", correct: "užuolaidos", options: ["užuolaidos", "pirštinės", "kojinės", "spintos"] },
+                { sentence: "Man reikia naujos _____. Sena jau sugedo.", correct: "skalbimo mašinos", options: ["skalbimo mašinos", "pagalvės", "stalo", "lovos"] },
+                { sentence: "Ši suknelė man per didelė. Ji man _____.", correct: "netinka", options: ["netinka", "nekabo", "neguli", "nestovi"] },
+                { sentence: "Žiemą aš visada dėviu šiltą _____ ir kepurę.", correct: "paltą", options: ["paltą", "sijoną", "suknelę", "basutes"] },
+                { sentence: "Ant sienos _____ gražus paveikslas.", correct: "kabo", options: ["kabo", "guli", "sėdi", "tinka"] },
+                { sentence: "Aš _____ naujo buto. Noriu persikelti į didesnį.", correct: "ieškau", options: ["ieškau", "važiuoju", "mezgu", "kabinu"] },
+                { sentence: "Šis megztinis yra iš _____. Jis labai šiltas.", correct: "vilnos", options: ["vilnos", "medvilnės", "šilko", "lino"] },
+                { sentence: "Svetainėje stovi sofa, fotelis ir mažas _____.", correct: "staliukas", options: ["staliukas", "šaldytuvas", "dušas", "gėlė"] },
+                { sentence: "Ji mėgsta _____ papuošalus – žiedus, apyrankes ir auskarus.", correct: "nešioti", options: ["nešioti", "megzti", "prekiauti", "taupyti"] },
+                { sentence: "Kiek _____ šio buto nuoma per mėnesį?", correct: "kainuoja", options: ["kainuoja", "sugenda", "tinka", "kabo"] },
+                { sentence: "Miegamajame yra lova, spinta ir du _____.", correct: "paveikslai", options: ["paveikslai", "batai", "sijonai", "peiliai"] },
+                { sentence: "Miegamajame ant grindų guli didelis _____.", correct: "kilimas", options: ["kilimas", "lova", "puodelis", "rankšluostis"] },
+                { sentence: "Šie marškiniai yra _____. Reikia nusipirkti naujus.", correct: "suplyšę", options: ["suplyšę", "sugedę", "patogūs", "minkšti"] },
+                { sentence: "Mes _____ į naują butą kitą savaitę.", correct: "persikelsime", options: ["persikelsime", "pasipuošime", "prekiausime", "taupysime"] }
+            ],
+            unit8: [
+                { sentence: "Man labai skauda _____. Negaliu nieko valgyti.", correct: "gerklę", options: ["gerklę", "koją", "ranką", "nugarą"] },
+                { sentence: "Aš labai _____: karščiuoju, kosčiu ir sloguoju.", correct: "sergu", options: ["sergu", "juokiuosi", "džiaugiuosi", "ilsiuosi"] },
+                { sentence: "Lauke labai šalta ir _____. Reikia šiltai apsirengti.", correct: "vėjuota", options: ["vėjuota", "saulėta", "giedra", "karšta"] },
+                { sentence: "Eik pas _____! Jis išrašys receptą vaistams.", correct: "gydytoją", options: ["gydytoją", "vaistininką", "mokytoją", "draugą"] },
+                { sentence: "Šiandien dangus _____ – nėra nė vienos debesies.", correct: "giedras", options: ["giedras", "debesuotas", "lietingas", "drėgnas"] },
+                { sentence: "Kai peršalu, visada geriu karštą arbatą su _____.", correct: "medumi", options: ["medumi", "sniegu", "ledu", "morkomis"] },
+                { sentence: "Vakar visą dieną _____ sniegas. Dabar visur balta balta.", correct: "snigo", options: ["snigo", "lijo", "švietė", "pūtė"] },
+                { sentence: "Vaistinėje ji nusipirko _____ nuo galvos skausmo. Gydytojas parašė receptą.", correct: "vaistų", options: ["medaus", "lupenų", "sodos", "vaistų"] },
+                { sentence: "Ryte aš visada _____ šaltu vandeniu.", correct: "prausiuosi", options: ["prausiuosi", "rengiuosi", "ilsiuosi", "stebiu"] },
+                { sentence: "Žiemą dienos trumpos, o _____ ilgos.", correct: "naktys", options: ["naktys", "saulės", "žvaigždės", "vėjai"] },
+                { sentence: "Rytą _____ tirštas rūkas. Nieko nesimatė.", correct: "tvyrojo", options: ["tvyrojo", "snigo", "lijo", "švietė"] },
+                { sentence: "Jis _____ koją ir dabar negali vaikščioti.", correct: "susilaužė", options: ["susilaužė", "sušlapo", "sušalo", "pasveiko"] },
+                { sentence: "Po ligos ji pagaliau _____. Jau gali eiti į darbą.", correct: "pasveiko", options: ["pasveiko", "susirgo", "sušlapo", "sušalo"] },
+                { sentence: "Danguje šviečia _____ ir daug žvaigždžių. Vakaras labai gražus.", correct: "mėnulis", options: ["mėnulis", "debesis", "rūkas", "sniegas"] },
+                { sentence: "Jaučiuosi labai _____, noriu kuo greičiau eiti į lovą.", correct: "pavargęs", options: ["pavargęs", "pasveikęs", "nustebęs", "susišukavęs"] }
+            ]
+        };
+
+        // ==================== MAIN APP ====================
+        function App() {
+            const [currentUnit, setCurrentUnit] = useState('unit5');
+            const [direction, setDirection] = useState('en-lt');
+            const [mode, setMode] = useState('menu');
+            const [lastMode, setLastMode] = useState('');
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [isFlipped, setIsFlipped] = useState(false);
+            const [userAnswer, setUserAnswer] = useState('');
+            const [feedback, setFeedback] = useState('');
+            const [score, setScore] = useState({ correct: 0, total: 0 });
+            const [shuffledVocab, setShuffledVocab] = useState([]);
+            const [multipleChoiceOptions, setMultipleChoiceOptions] = useState([]);
+            const [shuffledSentences, setShuffledSentences] = useState([]);
+            const [sentenceOptions, setSentenceOptions] = useState([]);
+            const [selectedOption, setSelectedOption] = useState(null);
+            // NEW: Difficult words recycling
+            const [incorrectWords, setIncorrectWords] = useState([]);
+            const [isReviewRound, setIsReviewRound] = useState(false);
+            const [reviewIncorrectWords, setReviewIncorrectWords] = useState([]);
+
+            const currentVocab = vocabularyData[currentUnit];
+            const currentSentences = sentenceData[currentUnit];
+
+
+
+            useEffect(() => {
+                if (mode === 'completed' || mode === 'reviewOffer') return;
+                const shuffled = [...currentVocab].sort(() => Math.random() - 0.5);
+                setShuffledVocab(shuffled);
+                setCurrentIndex(0);
+                setScore({ correct: 0, total: 0 });
+                setIncorrectWords([]);
+                setIsReviewRound(false);
+                setReviewIncorrectWords([]);
+                if (currentSentences && currentSentences.length > 0) {
+                    const shuffledSents = [...currentSentences].sort(() => Math.random() - 0.5);
+                    setShuffledSentences(shuffledSents);
+                }
+            }, [currentUnit, mode, direction]);
+
+            useEffect(() => {
+                if (mode === 'multipleChoice' && shuffledVocab.length > 0) {
+                    generateMultipleChoiceOptions();
+                }
+                if (mode === 'sentenceCompletion' && shuffledSentences.length > 0 && shuffledSentences[currentIndex]) {
+                    generateSentenceOptions();
+                }
+            }, [currentIndex, shuffledVocab, shuffledSentences, mode]);
+
+            const generateMultipleChoiceOptions = () => {
+                const currentWord = shuffledVocab[currentIndex];
+                if (!currentWord) return;
+                const otherWords = shuffledVocab.filter((_, idx) => idx !== currentIndex);
+                const randomOptions = otherWords.sort(() => Math.random() - 0.5).slice(0, 3);
+                const allOptions = [currentWord, ...randomOptions].sort(() => Math.random() - 0.5);
+                setMultipleChoiceOptions(allOptions);
+            };
+
+            const generateSentenceOptions = () => {
+                const currentSentence = shuffledSentences[currentIndex];
+                if (currentSentence && currentSentence.options) {
+                    const shuffledOpts = [...currentSentence.options].sort(() => Math.random() - 0.5);
+                    setSentenceOptions(shuffledOpts);
+                }
+            };
+
+            const trackIncorrect = (word) => {
+                if (isReviewRound) {
+                    setReviewIncorrectWords(prev => [...prev, word]);
+                } else {
+                    setIncorrectWords(prev => [...prev, word]);
+                }
+            };
+
+            const handleNext = () => {
+                const maxIndex = mode === 'sentenceCompletion'
+                    ? shuffledSentences.length - 1
+                    : shuffledVocab.length - 1;
+
+                if (currentIndex < maxIndex) {
+                    setCurrentIndex(currentIndex + 1);
+                    setIsFlipped(false);
+                    setUserAnswer('');
+                    setFeedback('');
+                    setSelectedOption(null);
+                } else {
+                    setLastMode(mode);
+                    // Check if we should offer review (only for vocab modes, not sentence completion)
+                    const wordsToReview = isReviewRound ? reviewIncorrectWords : incorrectWords;
+                    if (mode !== 'sentenceCompletion' && mode !== 'flashcards' && wordsToReview.length > 0) {
+                        setMode('reviewOffer');
+                    } else {
+                        setMode('completed');
+                    }
+                }
+            };
+
+            const startReviewRound = () => {
+                const wordsToReview = isReviewRound ? reviewIncorrectWords : incorrectWords;
+                const uniqueWords = [...new Map(wordsToReview.map(w => [w.lithuanian, w])).values()];
+                const shuffled = uniqueWords.sort(() => Math.random() - 0.5);
+                setShuffledVocab(shuffled);
+                setCurrentIndex(0);
+                setScore({ correct: 0, total: 0 });
+                setReviewIncorrectWords([]);
+                setIsReviewRound(true);
+                setFeedback('');
+                setSelectedOption(null);
+                setUserAnswer('');
+                setMode(lastMode);
+            };
+
+            const handleFlip = () => setIsFlipped(!isFlipped);
+
+            const checkAnswer = () => {
+                const currentWord = shuffledVocab[currentIndex];
+                const correctAnswer = direction === 'en-lt' ? currentWord.lithuanian : currentWord.english;
+                const normalizedAnswer = userAnswer.toLowerCase().trim();
+                const normalizedCorrect = correctAnswer.toLowerCase().trim();
+
+                if (normalizedAnswer === normalizedCorrect) {
+                    setFeedback('correct');
+                    setScore(s => ({ correct: s.correct + 1, total: s.total + 1 }));
+                } else {
+                    setFeedback('incorrect');
+                    setScore(s => ({ ...s, total: s.total + 1 }));
+                    trackIncorrect(currentWord);
+                }
+                setTimeout(() => handleNext(), 1500);
+            };
+
+            const handleMultipleChoice = (selectedWord) => {
+                const currentWord = shuffledVocab[currentIndex];
+                const isCorrect = direction === 'en-lt'
+                    ? selectedWord.lithuanian === currentWord.lithuanian
+                    : selectedWord.english === currentWord.english;
+
+                if (isCorrect) {
+                    setFeedback('correct');
+                    setScore(s => ({ correct: s.correct + 1, total: s.total + 1 }));
+                } else {
+                    setFeedback('incorrect');
+                    setScore(s => ({ ...s, total: s.total + 1 }));
+                    trackIncorrect(currentWord);
+                }
+                setTimeout(() => handleNext(), 1500);
+            };
+
+            const handleSentenceAnswer = (option) => {
+                if (feedback !== '') return;
+                const currentSentence = shuffledSentences[currentIndex];
+                setSelectedOption(option);
+                if (option === currentSentence.correct) {
+                    setFeedback('correct');
+                    setScore(s => ({ correct: s.correct + 1, total: s.total + 1 }));
+                } else {
+                    setFeedback('incorrect');
+                    setScore(s => ({ ...s, total: s.total + 1 }));
+                }
+                setTimeout(() => handleNext(), 1500);
+            };
+
+            const resetToMenu = () => {
+                setMode('menu');
+                setScore({ correct: 0, total: 0 });
+                setCurrentIndex(0);
+                setFeedback('');
+                setIncorrectWords([]);
+                setReviewIncorrectWords([]);
+                setIsReviewRound(false);
+            };
+
+            // ==================== SCREENS ====================
+            const colors = { unit5: '#2e7d32', unit6: '#1565c0', unit7: '#e65100', unit8: '#c62828' };
+            const bgColors = { unit5: '#e8f5e9', unit6: '#e3f2fd', unit7: '#fff3e0', unit8: '#fce4ec' };
+            const dotColors = ['#7ab5d4', '#7ab5a0', '#d4a574', '#c48a9a'];
+
+            const PageWrapper = ({ children }) => (
+                <div className="min-h-screen p-4 sm:p-6">
+                    <div className="max-w-2xl mx-auto">{children}</div>
+                </div>
+            );
+
+            const BackButton = () => (
+                <button onClick={resetToMenu} className="px-4 py-2 bg-white rounded-full shadow-sm text-gray-500 text-sm font-medium hover:shadow transition-shadow">
+                    ← Meniu
+                </button>
+            );
+
+            const ProgressBar = ({ current, total, label }) => (
+                <div className="text-gray-500 font-medium text-sm">
+                    {label} {current + 1} / {total}
+                    {isReviewRound && <span className="review-badge ml-2 text-amber-600 font-semibold">⟳ Kartojimas</span>}
+                </div>
+            );
+
+            const ScoreDisplay = () => (
+                <div className="bg-white rounded-xl shadow-sm p-4 text-center">
+                    <div className="text-sm text-gray-400">Rezultatas</div>
+                    <div className="text-2xl font-bold text-gray-700">{score.correct} / {score.total}</div>
+                </div>
+            );
+
+            const FeedbackDisplay = ({ correctAnswer }) => feedback ? (
+                <div className={`mt-5 p-4 rounded-xl text-center font-semibold fade-in ${feedback === 'correct' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    {feedback === 'correct' ? '✓ Teisingai!' : `✗ Neteisingai. Teisingas atsakymas: ${correctAnswer}`}
+                </div>
+            ) : null;
+
+            // ==================== MENU ====================
+            const MenuScreen = () => (
+                <PageWrapper>
+                    <div className="text-center mb-6 pt-4">
+                        <div className="inline-block bg-white rounded-full w-14 h-14 leading-[56px] text-xl font-bold text-blue-600 mb-3 shadow-sm" style={{color:'#4a6fa5'}}>LT</div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight">Žodyno pratybos</h1>
+                        <p className="text-gray-400 mt-1">5–8 pamokos</p>
+                    </div>
+
+                    {/* Direction toggle */}
+                    <div className="mb-5">
+                        <p className="text-sm text-gray-500 font-medium mb-2 text-center">Pasirinkite kryptį / Choose direction</p>
+                        <div className="flex gap-1 bg-white rounded-full p-1 shadow-sm max-w-sm mx-auto">
+                            <button onClick={() => setDirection('en-lt')}
+                                className={`toggle-pill flex-1 rounded-full py-2.5 text-sm font-medium text-center ${direction === 'en-lt' ? 'bg-blue-500 text-white shadow-sm' : 'text-gray-400'}`}
+                                style={direction === 'en-lt' ? {background:'#4a6fa5'} : {}}>
+                                EN → LT
+                            </button>
+                            <button onClick={() => setDirection('lt-en')}
+                                className={`toggle-pill flex-1 rounded-full py-2.5 text-sm font-medium text-center ${direction === 'lt-en' ? 'bg-blue-500 text-white shadow-sm' : 'text-gray-400'}`}
+                                style={direction === 'lt-en' ? {background:'#4a6fa5'} : {}}>
+                                LT → EN
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Unit selection */}
+                    <div className="mb-5">
+                        <p className="text-sm text-gray-500 font-medium mb-2">Pasirinkite pamoką</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            {Object.keys(vocabularyData).map((unitKey) => {
+                                const info = unitInfo[unitKey];
+                                const num = unitKey.replace('unit','');
+                                const isActive = currentUnit === unitKey;
+                                return (
+                                    <button key={unitKey} onClick={() => setCurrentUnit(unitKey)}
+                                        className={`bg-white rounded-xl p-3.5 text-left transition-all shadow-sm ${isActive ? 'ring-2' : 'hover:shadow-md'}`}
+                                        style={isActive ? {ringColor: colors[unitKey], boxShadow: `0 0 0 2px ${colors[unitKey]}`} : {}}>
+                                        <div className="inline-block text-xs font-semibold px-2 py-0.5 rounded-lg mb-1.5"
+                                            style={{background: bgColors[unitKey], color: colors[unitKey]}}>{num}</div>
+                                        <div className="text-sm font-medium text-gray-800">{info.title}</div>
+                                        <div className="text-xs text-gray-400 mt-1">{vocabularyData[unitKey].length} žodžiai</div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Mode selection */}
+                    <div>
+                        <p className="text-sm text-gray-500 font-medium mb-2">Pasirinkite pratybų tipą</p>
+                        <div className="flex flex-col gap-2">
+                            {[
+                                { m: 'flashcards', label: 'Kortelės', dot: dotColors[0] },
+                                { m: 'multipleChoice', label: 'Pasirinkite teisingą atsakymą', dot: dotColors[1] },
+                                { m: 'typing', label: 'Įrašykite atsakymą', dot: dotColors[2] },
+                                { m: 'sentenceCompletion', label: 'Užbaikite sakinius', dot: dotColors[3] }
+                            ].map((item) => (
+                                <button key={item.m} onClick={() => setMode(item.m)}
+                                    className="flex items-center gap-3 bg-white rounded-xl p-3.5 shadow-sm text-left transition-all hover:shadow-md text-gray-600">
+                                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{background: item.dot}}></div>
+                                    <span className="text-sm font-medium">{item.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </PageWrapper>
+            );
+
+            // ==================== FLASHCARDS ====================
+            const FlashcardsMode = () => {
+                const currentWord = shuffledVocab[currentIndex];
+                if (!currentWord) return null;
+                const frontText = direction === 'en-lt' ? currentWord.english : currentWord.lithuanian;
+                const backText = direction === 'en-lt' ? currentWord.lithuanian : currentWord.english;
+                const frontLabel = direction === 'en-lt' ? 'Angliškai' : 'Lietuviškai';
+                const backLabel = direction === 'en-lt' ? 'Lietuviškai' : 'Angliškai';
+
+                return (
+                    <PageWrapper>
+                        <div className="flex justify-between items-center mb-6">
+                            <BackButton />
+                            <ProgressBar current={currentIndex} total={shuffledVocab.length} label="Kortelė" />
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-sm p-8 mb-5 min-h-[260px] flex items-center justify-center cursor-pointer" onClick={handleFlip}>
+                            <div className="text-center">
+                                <div className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{isFlipped ? backLabel : frontLabel}</div>
+                                <div className="text-2xl sm:text-3xl font-bold text-gray-800">{isFlipped ? backText : frontText}</div>
+                                <div className="text-xs text-gray-300 mt-6">Spauskite, kad apverstumėte</div>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={handleFlip} className="flex-1 py-3 bg-white rounded-xl shadow-sm text-gray-600 font-medium text-sm hover:shadow transition-shadow">Apversti</button>
+                            <button onClick={handleNext} className="flex-1 py-3 rounded-xl shadow-sm text-white font-medium text-sm hover:shadow transition-shadow" style={{background:'#4a6fa5'}}>Kita →</button>
+                        </div>
+                    </PageWrapper>
+                );
+            };
+
+            // ==================== MULTIPLE CHOICE ====================
+            const MultipleChoiceMode = () => {
+                const currentWord = shuffledVocab[currentIndex];
+                if (!currentWord || multipleChoiceOptions.length === 0) return null;
+                const promptText = direction === 'en-lt' ? currentWord.english : currentWord.lithuanian;
+                const promptLabel = direction === 'en-lt' ? 'Išverskite į lietuvių kalbą' : 'Translate to English';
+                const correctAnswer = direction === 'en-lt' ? currentWord.lithuanian : currentWord.english;
+
+                return (
+                    <PageWrapper>
+                        <div className="flex justify-between items-center mb-6">
+                            <BackButton />
+                            <ProgressBar current={currentIndex} total={shuffledVocab.length} label="Klausimas" />
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-sm p-8 mb-5">
+                            <div className="text-center mb-6">
+                                <div className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{promptLabel}</div>
+                                <div className="text-2xl sm:text-3xl font-bold text-gray-800">{promptText}</div>
+                            </div>
+                            <div className="space-y-2">
+                                {multipleChoiceOptions.map((option, idx) => {
+                                    const optionText = direction === 'en-lt' ? option.lithuanian : option.english;
+                                    const isCorrectOption = direction === 'en-lt' ? option.lithuanian === currentWord.lithuanian : option.english === currentWord.english;
+                                    return (
+                                        <button key={idx} onClick={() => handleMultipleChoice(option)} disabled={feedback !== ''}
+                                            className={`w-full p-3.5 rounded-xl text-left text-sm font-medium transition-all ${
+                                                feedback === '' ? 'bg-gray-50 hover:bg-blue-50 text-gray-700 border border-gray-100' 
+                                                : isCorrectOption ? 'bg-green-50 text-green-700 border border-green-200' 
+                                                : 'bg-gray-50 text-gray-300 border border-gray-100'}`}>
+                                            {optionText}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <FeedbackDisplay correctAnswer={correctAnswer} />
+                        </div>
+                        <ScoreDisplay />
+                    </PageWrapper>
+                );
+            };
+
+            // ==================== TYPING ====================
+            const TypingMode = () => {
+                const currentWord = shuffledVocab[currentIndex];
+                if (!currentWord) return null;
+                const promptText = direction === 'en-lt' ? currentWord.english : currentWord.lithuanian;
+                const promptLabel = direction === 'en-lt' ? 'Įrašykite lietuviškai' : 'Type in English';
+                const correctAnswer = direction === 'en-lt' ? currentWord.lithuanian : currentWord.english;
+
+                return (
+                    <PageWrapper>
+                        <div className="flex justify-between items-center mb-6">
+                            <BackButton />
+                            <ProgressBar current={currentIndex} total={shuffledVocab.length} label="Klausimas" />
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-sm p-8 mb-5">
+                            <div className="text-center mb-6">
+                                <div className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{promptLabel}</div>
+                                <div className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">{promptText}</div>
+                                <input type="text" value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && userAnswer && checkAnswer()}
+                                    placeholder="Įrašykite atsakymą..." disabled={feedback !== ''}
+                                    className="w-full p-4 text-lg border border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100" autoFocus />
+                            </div>
+                            <button onClick={checkAnswer} disabled={!userAnswer || feedback !== ''}
+                                className="w-full py-3 rounded-xl text-white font-medium text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all" style={{background:'#4a6fa5'}}>
+                                Tikrinti atsakymą
+                            </button>
+                            <FeedbackDisplay correctAnswer={correctAnswer} />
+                        </div>
+                        <ScoreDisplay />
+                    </PageWrapper>
+                );
+            };
+
+            // ==================== SENTENCE COMPLETION ====================
+            const SentenceCompletionMode = () => {
+                if (shuffledSentences.length === 0 || sentenceOptions.length === 0) {
+                    return <div className="min-h-screen flex items-center justify-center"><div className="text-lg text-gray-400">Kraunama...</div></div>;
+                }
+                const currentSentence = shuffledSentences[currentIndex];
+                if (!currentSentence) return <div className="min-h-screen flex items-center justify-center"><div className="text-lg text-gray-400">Kraunama...</div></div>;
+                const correctAnswer = currentSentence.correct;
+
+                return (
+                    <PageWrapper>
+                        <div className="flex justify-between items-center mb-6">
+                            <BackButton />
+                            <ProgressBar current={currentIndex} total={shuffledSentences.length} label="Sakinys" />
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-sm p-8 mb-5">
+                            <div className="text-center mb-6">
+                                <div className="text-xs text-gray-400 mb-3 uppercase tracking-wider">Užbaikite sakinį</div>
+                                <div className="text-xl sm:text-2xl font-bold text-gray-800">{currentSentence.sentence}</div>
+                            </div>
+                            <div className="space-y-2">
+                                {sentenceOptions.map((option, idx) => {
+                                    const isSelected = selectedOption === option;
+                                    const isCorrect = option === correctAnswer;
+                                    let cls = 'w-full p-3.5 rounded-xl text-left text-sm font-medium transition-all ';
+                                    if (feedback === '') cls += 'bg-gray-50 hover:bg-amber-50 text-gray-700 border border-gray-100';
+                                    else if (isSelected && feedback === 'correct') cls += 'bg-green-50 text-green-700 border border-green-200';
+                                    else if (isSelected && feedback === 'incorrect') cls += 'bg-red-50 text-red-700 border border-red-200';
+                                    else if (!isSelected && isCorrect && feedback === 'incorrect') cls += 'bg-green-50 text-green-700 border border-green-200';
+                                    else cls += 'bg-gray-50 text-gray-300 border border-gray-100';
+                                    return (
+                                        <button key={idx} onClick={() => handleSentenceAnswer(option)} disabled={feedback !== ''} className={cls}>
+                                            {option}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <FeedbackDisplay correctAnswer={correctAnswer} />
+                        </div>
+                        <ScoreDisplay />
+                    </PageWrapper>
+                );
+            };
+
+            // ==================== REVIEW OFFER ====================
+            const ReviewOfferScreen = () => {
+                const wordsToReview = isReviewRound ? reviewIncorrectWords : incorrectWords;
+                const uniqueWords = [...new Map(wordsToReview.map(w => [w.lithuanian, w])).values()];
+                const percentage = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
+
+                return (
+                    <PageWrapper>
+                        <div className="fade-in mt-8">
+                            <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
+                                <div className="text-5xl mb-4">🔄</div>
+                                <h2 className="text-2xl font-bold text-gray-800 mb-2">{isReviewRound ? 'Dar kartą?' : 'Beveik!'}</h2>
+                                <p className="text-gray-500 mb-1">Rezultatas: {score.correct} / {score.total} ({percentage}%)</p>
+                                <p className="text-gray-500 mb-5">
+                                    {uniqueWords.length} {uniqueWords.length === 1 ? 'žodis' : uniqueWords.length < 10 ? 'žodžiai' : 'žodžių'} reikia pakartoti:
+                                </p>
+                                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6 text-left max-h-48 overflow-y-auto">
+                                    {uniqueWords.map((w, i) => (
+                                        <div key={i} className="flex items-center gap-2 py-1.5 border-b border-amber-100 last:border-0 text-sm">
+                                            <span className="font-semibold text-gray-800">{w.lithuanian}</span>
+                                            <span className="text-gray-300">—</span>
+                                            <span className="text-gray-600">{w.english}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex gap-2 justify-center flex-wrap">
+                                    <button onClick={startReviewRound}
+                                        className="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium text-sm transition-colors shadow-sm">
+                                        ⟳ Pakartoti šiuos žodžius
+                                    </button>
+                                    <button onClick={() => setMode('completed')}
+                                        className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-medium text-sm transition-colors">
+                                        Baigti →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </PageWrapper>
+                );
+            };
+
+            // ==================== COMPLETION ====================
+            const CompletionScreen = () => {
+                const percentage = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
+                let message, emoji;
+                if (percentage === 100) { message = 'Puiku! Tobulas rezultatas!'; emoji = '🎉'; }
+                else if (percentage >= 80) { message = 'Labai gerai!'; emoji = '😊'; }
+                else if (percentage >= 60) { message = 'Gerai, bet galima geriau!'; emoji = '👍'; }
+                else { message = 'Reikia daugiau praktikos!'; emoji = '💪'; }
+
+                return (
+                    <PageWrapper>
+                        <div className="fade-in mt-8">
+                            <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
+                                <div className="text-6xl mb-4">{emoji}</div>
+                                <h2 className="text-2xl font-bold text-gray-800 mb-1">Baigta!</h2>
+                                <p className="text-lg text-gray-500 mb-5">{message}</p>
+                                <div className="bg-gray-50 rounded-xl p-5 mb-5">
+                                    <div className="text-4xl font-bold mb-1" style={{color:'#4a6fa5'}}>{percentage}%</div>
+                                    <div className="text-sm text-gray-500 mb-3">{score.correct} iš {score.total} teisingų atsakymų</div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div className="h-2.5 rounded-full transition-all duration-500" style={{width: `${percentage}%`, background:'#4a6fa5'}}></div>
+                                    </div>
+                                    {isReviewRound && <div className="mt-2 text-xs text-amber-600 font-medium">⟳ Po kartojimo</div>}
+                                </div>
+                                <div className="flex gap-2 justify-center flex-wrap">
+                                    <button onClick={resetToMenu}
+                                        className="px-5 py-3 text-white rounded-xl font-medium text-sm transition-colors shadow-sm" style={{background:'#4a6fa5'}}>
+                                        Grįžti į meniu
+                                    </button>
+                                    <button onClick={() => {
+                                        setCurrentIndex(0); setScore({ correct: 0, total: 0 }); setFeedback(''); setSelectedOption(null); setUserAnswer('');
+                                        setIncorrectWords([]); setReviewIncorrectWords([]); setIsReviewRound(false); setMode(lastMode);
+                                    }}
+                                        className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-medium text-sm transition-colors">
+                                        Bandyti dar kartą
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </PageWrapper>
+                );
+            };
+
+            return (
+                <>
+                    {mode === 'menu' && <MenuScreen />}
+                    {mode === 'flashcards' && <FlashcardsMode />}
+                    {mode === 'multipleChoice' && <MultipleChoiceMode />}
+                    {mode === 'typing' && <TypingMode />}
+                    {mode === 'sentenceCompletion' && <SentenceCompletionMode />}
+                    {mode === 'reviewOffer' && <ReviewOfferScreen />}
+                    {mode === 'completed' && <CompletionScreen />}
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+    <script>
+        // Register PWA service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
+    </script>
+</body>
+</html>
