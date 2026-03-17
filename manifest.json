@@ -2,7 +2,7 @@
   "name": "Žodyno pratybos (5-8 pamokos)",
   "short_name": "LT Žodynas",
   "description": "Lietuvių kalbos žodyno pratybos – 5-8 pamokos",
-  "start_url": "./lietuviu_kalbos_zodynas_5_8.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#fafaf9",
   "theme_color": "#292524",
