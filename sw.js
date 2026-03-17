@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lt-zodynas-v1';
+const CACHE_NAME = 'lt-zodynas-v2';
 const URLS_TO_CACHE = [
   './',
   './lietuviu_kalbos_zodynas_5_8.html',
